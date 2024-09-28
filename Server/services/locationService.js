@@ -32,5 +32,18 @@ const getAttractionsWithinRadius=async(lat,lon,radius,cat=null)=>{
   }
 }
 
-module.exports={getLatLong,getAttractionsWithinRadius}
+const getAttractionByName=async(name)=>{
+    const q=`select * from attractions where name=$1`
+    const value=[name];
+    try{
+      const data=await pool.query(q,value);
+      return data.rows;
+    }
+    catch(e){
+      console.error("Error:", e.message);
+      throw new Error("Cannot fetch the details of the attractions");
+    }
+}
+
+module.exports={getLatLong,getAttractionsWithinRadius,getAttractionByName};
   
