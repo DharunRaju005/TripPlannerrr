@@ -4,6 +4,8 @@ const {pool}=require("../config/postgresClient")
 const getLatLong = async (destination) => {
     try {
       const data = await opencage.geocode({ q: destination });
+      console.log(data);
+      
       if (data.status.code === 200 && data.results.length > 0) {
         return data.results[0].geometry;
       } else {
