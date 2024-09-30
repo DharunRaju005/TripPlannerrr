@@ -1,5 +1,7 @@
 const opencage = require('opencage-api-client');
 const {pool}=require("../config/postgresClient")
+const axios=require('axios');
+
 
 const getLatLong = async (destination) => {
     try {
@@ -22,6 +24,7 @@ const getAttractionsWithinRadius=async(lat,lon,radius,cat=null)=>{
   if(cat){
     q+=`and category=$4`
   }
+  q+=`ORDER BY ST_Y(location::geometry), ST_X(location::geometry)`
   const values=cat?[lat,lon,radius,cat]:[lat,lon,radius];
   try{
     const res=await pool.query(q,values);
@@ -47,5 +50,27 @@ const getAttractionByName=async(name)=>{
     }
 }
 
-module.exports={getLatLong,getAttractionsWithinRadius,getAttractionByName};
+
+
+
+const getNearByPlaces=async(lat,lon,radius=3)=>{
+ let q = `SELECT * FROM places 
+         WHERE ST_DWithin(location::geography, ST_MakePoint($2, $1)::geography, $3 * 1000)
+         ORDER BY ST_Y(location::geometry), ST_X(location::geometry);`;
+
+  const values=[lat,lon,radius];
+  try{
+    const places=await pool.query(q,values);
+    return places.rows;
+  }
+  catch(e){
+        console.error("Error",e.message);
+        throw new Error("Cannot fetch the hotels");
+  }
+  
+  // return res.status(404).json(err)
+}
+
+
+module.exports={getLatLong,getAttractionsWithinRadius,getAttractionByName,getNearByPlaces};
   

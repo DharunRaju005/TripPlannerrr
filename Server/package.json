@@ -25,6 +25,7 @@
     "opencage-api-client": "^1.0.7",
     "pg": "^8.13.0",
     "postgis": "^1.0.5",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "serpapi": "^2.1.0"
   }
 }

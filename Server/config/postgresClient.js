@@ -56,19 +56,34 @@ const createTablesQuery = `
     location GEOGRAPHY(Point, 4326) -- Geospatial data of the attraction
 );
 
-`;
+    
 
-// Function to run the SQL queries
+
+`;
+// CREATE TABLE IF NOT EXISTS places (
+//     id SERIAL PRIMARY KEY,
+//     name TEXT NOT NULL,                           -- Name of the place (Restaurant/Hotel)
+//     description TEXT,                             -- Description of the place
+//     latitude DECIMAL(9,6),                        -- Latitude for geolocation
+//     longitude DECIMAL(9,6),                       -- Longitude for geolocation
+//     rating DECIMAL(2,1),                          -- Rating of the place (1-5)
+//     price_range VARCHAR(50),                      -- Price range (e.g., '$', '$$', '$$$')
+//     timing VARCHAR(100),                          -- Opening hours (e.g., '10:00 AM - 11:00 PM')
+//     phone_number VARCHAR(20),                     -- Contact phone number
+//     destination_id INT,                           -- Foreign key to destinations
+//     FOREIGN KEY (destination_id) REFERENCES destinations(id)
+// );
+// // Function to run the SQL queries
 const createTables = async () => {
     const client = await pool.connect();
     try {
         console.log('Creating tables...');
-        await client.query(createTablesQuery);  // Execute the SQL query
+        await client.query(createTablesQuery);  
         console.log('Tables created successfully!');
     } catch (err) {
         console.error('Error creating tables:', err);
     } finally {
-        client.release();  // Release the client back to the pool
+        client.release();  
     }
 };
 
@@ -95,7 +110,7 @@ const listTables = async () => {
     } catch (err) {
         console.error('Error fetching tables:', err);
     } finally {
-        client.release(); // Release the client back to the pool
+        client.release(); 
     }
 };
 module.exports = {pool,listTables};

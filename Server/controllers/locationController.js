@@ -1,4 +1,4 @@
-const { getLatLong,getAttractionsWithinRadius,getAttractionByName } = require("../services/locationService");
+const { getLatLong,getAttractionsWithinRadius,getAttractionByName,getNearbyHotels, getNearByPlaces } = require("../services/locationService");
 const{getWeatherForecast,getSuggestionBasedOnWeather} =require('../services/weatherService')
 const getAttraction=async(req,res)=>{
   const{destination,days,cat,date}=req.query;
@@ -20,7 +20,11 @@ const getAttraction=async(req,res)=>{
     const attractions=await getAttractionsWithinRadius(location.lat,location.lng,radius,cat);
     // console.log(attractions);
     const weatherData=await getWeatherForecast(date,days,location.lat,location.lng);
-    const suggestions=await getSuggestionBasedOnWeather(weatherData,attractions,location);
+    const places=await getNearByPlaces(location.lat,location.lng);
+    const suggestions=await getSuggestionBasedOnWeather(weatherData,attractions,places);
+    // const temp=await getNearbyHotels(location.lat,location.lng);
+    // console.log(temp);
+    
     return res.status(200).json(suggestions);
   }
   catch(e){
