@@ -1,35 +1,30 @@
 const dotenv=require('dotenv');
-const axios=require('axios')
+const axios=require('axios');
+const { getLocalRestaurants } = require('./locationService');
 dotenv.config();
-const getWeatherForecast = async (date, days, lat, lng) => {
+const getWeatherForecast = async (date, lat, lng) => {
     const apiKey = process.env.OPEN_WEATHER_KEY;
     const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric`;
 
     try {
+        
         const res = await axios.get(url);
-        const data = res.data.list;
+        const data = res.data.list; //contains weather with 3 hrs interval
 
-        // Convert user-provided date to a Date object
-        const startDate = new Date(date); // Assuming date is a string like "2024-09-30"
-        const endDate = new Date(startDate); // Clone the start date
-        endDate.setDate(startDate.getDate() + days); // Add the number of days
+        
+        const startDate = new Date(date); 
+        startDate.setHours(6, 0, 0, 0);
+        const endDate = new Date(startDate);
+        endDate.setHours(18, 0, 0, 0); 
 
-        // Filter the weather data based on the provided start and end dates
         const filteredData = data.filter((item) => {
             const forecastDate = new Date(item.dt * 1000); // Convert UNIX timestamp to Date
-            
-            // Get the hours from the forecastDate (0-23 format)
-            const hours = forecastDate.getUTCHours();
-
-            // Check if the date is within the specified range AND time is between 6 AM (6) and 6 PM (18)
             return (
                 forecastDate.getTime() >= startDate.getTime() &&
-                forecastDate.getTime() < endDate.getTime() &&
-                hours >= 6 && hours <= 18
+                forecastDate.getTime() < endDate.getTime()
             );
         });
 
-        // If no data is found within the date range, log for debugging
         if (filteredData.length === 0) {
             console.log("No data found within the specified date and time range.");
         }
@@ -41,26 +36,96 @@ const getWeatherForecast = async (date, days, lat, lng) => {
     }
 };
 
+
 // https://community.esri.com/t5/coordinate-reference-systems-blog/distance-on-a-sphere-the-haversine-formula/ba-p/902128
+// const calculateDistance = (lat1, lon1, lat2, lon2) => {
+//     const R = 6371; 
+//     const dLat = (lat2 - lat1) * (Math.PI / 180);
+//     const dLon = (lon2 - lon1) * (Math.PI / 180);
+//     const a =
+//         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+//         Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+//         Math.sin(dLon / 2) * Math.sin(dLon / 2);
+//     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+//     const distance = R * c;
+//     return distance;
+// };
+
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; 
+    const R = 6371; // Earth's radius in kilometers
+
+    // Parse lat/lon as floats (if they're passed as strings)
+    lat1 = parseFloat(lat1);
+    lon1 = parseFloat(lon1);
+    lat2 = parseFloat(lat2);
+    lon2 = parseFloat(lon2);
+
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
+
     const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-    return distance;
+
+    const distance = R * c; // Distance in kilometers
+
+    return distance; // Return distance in kilometers
 };
 
-const getSuggestionBasedOnWeather = async (weatherData, attractions, places) => {
+
+const getOptimalPathTomTom = async (attractions) => {
+    try {
+        const tomtomApiKey = process.env.TOMTOM_API_KEY;  // Replace with your TomTom API Key
+
+        // Extract latitude and longitude for each attraction
+        const coordinates = attractions.map(attraction => 
+            `${attraction.latitude},${attraction.longitude}`
+        ).join(':');  // TomTom expects the format as lat,long:lat,long:lat,long...
+        const coordinate = '37.7749,-122.4194:34.0522,-118.2437:36.1699,-115.1398';
+        
+        // Send the request to TomTom Routing API
+        const response = await axios.get(`https://api.tomtom.com/routing/1/calculateRoute/${coordinate}/json`, {
+            params: {
+                key: 'f3bIjpGOYx7wrEGGzd6yllmBAEK1Yu1i8kj',
+                routeType: 'shortest',
+                traffic: false,
+                travelMode: 'car'
+            },
+            headers: {
+                'Content-Type': 'application/json',
+                // Add Origin or Referer header if needed
+                // 'Origin': 'your-frontend-domain',
+            }
+        });
+        
+        console.log(response);
+        
+        // Check if the response contains valid route information
+        if (response.data.routes && response.data.routes.length > 0) {
+            return response.data.routes[0];  // Return the first route
+        } else {
+            console.error("No valid routes found.");
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching optimal route from TomTom:', error);
+        return null;
+    }
+};
+
+
+const getSuggestionBasedOnWeather = async (weatherData, attractions) => {
     const suggestions = [];
     let visitedAttractions = new Set();  // Track visited attractions
-    let visitedPlaces = new Set();       // Track visited hotels/restaurants
+    let visitedPlaces = new Set();       // Track visited restaurants
 
-    weatherData.forEach(weather => {
+    // Store all attractions planned for the day
+    const dailyAttractions = [];
+
+    for (const weather of weatherData) {
         if (weather.weather && weather.weather.length > 0) {
             const weatherCondition = weather.weather[0].main.toLowerCase();
             const temp = weather.main.temp;
@@ -69,7 +134,7 @@ const getSuggestionBasedOnWeather = async (weatherData, attractions, places) => 
             const highTemp = weather.main.temp_max;
             const currentHour = new Date(weather.dt_txt).getHours(); 
 
-            // Filter attractions based on weather, time, and avoid repeating suggestions
+            // Filter suggested attractions based on weather and restrictions
             const suggestedAttractions = attractions
                 .filter(attraction => {
                     const idealWeather = attraction.ideal_weather.toLowerCase();
@@ -78,7 +143,7 @@ const getSuggestionBasedOnWeather = async (weatherData, attractions, places) => 
                     } else if (weatherCondition === 'rain') {
                         return idealWeather.includes('rain');
                     } else {
-                        return true;
+                        return true; 
                     }
                 })
                 .filter(attraction => {
@@ -86,43 +151,40 @@ const getSuggestionBasedOnWeather = async (weatherData, attractions, places) => 
                     if (attraction.category.toLowerCase() === 'waterfalls') {
                         return currentHour >= 10 && currentHour <= 16;
                     }
-                    return true;
+                    return true; 
                 })
-                .filter(attraction => !visitedAttractions.has(attraction.id)) 
-                .slice(0, 2); // Limit to 2 attractions per time slot
+                .filter(attraction => !visitedAttractions.has(attraction.id)); 
 
+            // Add the newly suggested attractions to the daily list
+            dailyAttractions.push(...suggestedAttractions);
             suggestedAttractions.forEach(attraction => visitedAttractions.add(attraction.id));
 
-            // For each attraction, find the nearest hotel and restaurant
-            const suggestionsForAttractions = suggestedAttractions.map(attraction => {
-                const nearestHotel = places
-                    .filter(place => place.type === 'Hotel')
-                    .map(hotel => ({
-                        ...hotel,
-                        distance: calculateDistance(attraction.latitude, attraction.longitude, hotel.latitude, hotel.longitude)
-                    }))
-                    .sort((a, b) => a.distance - b.distance)  // Sort by distance
-                    .slice(0, 1)[0]; // Get the nearest hotel
+            // Get restaurants for the attractions suggested
+            const suggestionsForAttractions = await Promise.all(
+                suggestedAttractions.map(async attraction => {
+                    const res = await getLocalRestaurants(attraction.latitude, attraction.longitude);
+                    console.log("res", attraction.name, res);
 
-                const nearestRestaurant = places
-                    .filter(place => place.type === 'Restaurant')
-                    .map(restaurant => ({
-                        ...restaurant,
-                        distance: calculateDistance(attraction.latitude, attraction.longitude, restaurant.latitude, restaurant.longitude)
-                    }))
-                    .sort((a, b) => a.distance - b.distance)  // Sort by distance
-                    .slice(0, 1)[0]; // Get the nearest restaurant
+                    const nearestRestaurant = res
+                        .filter(place => place.rating >= 3)  
+                        .map(restaurant => ({
+                            ...restaurant,
+                            distance: calculateDistance(attraction.latitude, attraction.longitude, restaurant.latitude, restaurant.longitude)
+                        }))
+                        .sort((a, b) => a.distance - b.distance) 
+                        .slice(0, 5); 
 
-                // Mark them as visited
-                if (nearestHotel) visitedPlaces.add(nearestHotel.id);
-                if (nearestRestaurant) visitedPlaces.add(nearestRestaurant.id);
+                    // Mark the restaurant as visited
+                    if (nearestRestaurant.length > 0) {
+                        visitedPlaces.add(nearestRestaurant[0].name); // Using name as ID for simplicity
+                    }
 
-                return {
-                    attraction,
-                    hotel: nearestHotel,
-                    restaurant: nearestRestaurant
-                };
-            });
+                    return {
+                        attraction,
+                        restaurant: nearestRestaurant
+                    };
+                })
+            );
 
             // Add the suggestions to the final output
             suggestions.push({
@@ -145,12 +207,21 @@ const getSuggestionBasedOnWeather = async (weatherData, attractions, places) => 
                 low_temp: 'N/A',
                 high_temp: 'N/A',
                 attractions: [],
-                hotel_or_restaurant: [] // No hotels or restaurants in case of missing weather data
             });
         }
-    });
+    }
+
+    console.log("hi",dailyAttractions);
+    
+    // const route = await getOptimalPathTomTom(dailyAttractions);
+
+    // // Optionally, add the route to each day's suggestion or a summary at the end
+    // suggestions.forEach(suggestion => {
+    //     suggestion.optimal_route = route; // Add the calculated route
+    // });
 
     return suggestions;
 };
+
 
 module.exports={getWeatherForecast,getSuggestionBasedOnWeather};

@@ -2,9 +2,10 @@ const express=require('express');
 const dotenv=require('dotenv');
 dotenv.config();
 const makeConnection=require('./config/mongoClient')
-const app=express();
+
 const locationRoute=require('./routes/locationRoute')
 const {pool,listTables}=require('./config/postgresClient');
+const cors = require("cors");
 // makePsConnect();
 makeConnection();
 listTables();
@@ -35,6 +36,7 @@ listTables();
 //       console.log('become a customer: https://opencagedata.com/pricing');
 //     }
 //   });
+const app=express();
 
 app.use("/attraction",locationRoute);
   

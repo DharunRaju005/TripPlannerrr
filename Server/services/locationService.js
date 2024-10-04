@@ -1,6 +1,9 @@
 const opencage = require('opencage-api-client');
 const {pool}=require("../config/postgresClient")
 const axios=require('axios');
+const dotenv=require('dotenv');
+const { getJson } = require("serpapi");
+dotenv.config();
 
 
 const getLatLong = async (destination) => {
@@ -53,24 +56,51 @@ const getAttractionByName=async(name)=>{
 
 
 
-const getNearByPlaces=async(lat,lon,radius=3)=>{
- let q = `SELECT * FROM places 
-         WHERE ST_DWithin(location::geography, ST_MakePoint($2, $1)::geography, $3 * 1000)
-         ORDER BY ST_Y(location::geometry), ST_X(location::geometry);`;
 
-  const values=[lat,lon,radius];
-  try{
-    const places=await pool.query(q,values);
-    return places.rows;
+//https://serpapi.com/google-maps-api
+const getLocalRestaurants = async (latitude, longitude, radiusInKm = 2) => {
+  const apiKey = process.env.SERP_KEY;  
+  const location = `@${latitude},${longitude},15.1z`;
+
+  try {
+    
+    const restaurants = await new Promise((resolve, reject) => {
+      getJson({
+        engine: "google_maps",
+        q: "restaurant",  
+        radius: radiusInKm*1000,
+        ll: location,     
+        type: "search",
+        api_key: apiKey
+      }, (json) => {
+        if (!json || !json.local_results) {
+          return reject('No restaurants found');
+        }
+
+        
+        const restaurantList = json.local_results.map((restaurant) => ({
+          name: restaurant.title,
+          address: restaurant.address,
+          rating: restaurant.rating,
+          phone: restaurant.phone || 'N/A',
+          latitude: restaurant.gps_coordinates ? restaurant.gps_coordinates.latitude : 'N/A',
+          longitude: restaurant.gps_coordinates ? restaurant.gps_coordinates.longitude : 'N/A',
+        }));
+
+        resolve(restaurantList);
+      });
+    });
+    return (restaurants);
+  } catch (error) {
+    console.error('Error fetching local restaurants:', error);
+    return res.status(500).json({ error: 'Failed to fetch local restaurants' });
   }
-  catch(e){
-        console.error("Error",e.message);
-        throw new Error("Cannot fetch the hotels");
-  }
-  
-  // return res.status(404).json(err)
-}
+};
 
 
-module.exports={getLatLong,getAttractionsWithinRadius,getAttractionByName,getNearByPlaces};
+
+
+
+
+module.exports={getLatLong,getAttractionsWithinRadius,getAttractionByName,getLocalRestaurants};
   
