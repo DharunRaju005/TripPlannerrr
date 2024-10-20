@@ -173,7 +173,7 @@ const AttractionsPage = () => {
 
         const fetchAttractions = async () => {
             try {
-                const response = await axios.get('https://tripplannerserver-y7ge.onrender.com/attraction/getAttraction ', {
+                const response = await axios.get('https://tripplannerbe.onrender.com/attraction/getAttraction ', {
                     params: {
                         destination,
                         days: totalDays,
