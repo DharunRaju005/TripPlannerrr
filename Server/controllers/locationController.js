@@ -23,7 +23,7 @@ const getAttraction=async(req,res)=>{
     // const places=await getLocalRestaurants(location.lat,location.lng);
     // console.log("places",places);
     
-    const suggestions=await getSuggestionBasedOnWeather(weatherData,attractions);
+    const suggestions=await getSuggestionBasedOnWeather(weatherData,attractions,days);
     // const temp=await getNearbyHotels(location.lat,location.lng);
     // console.log(suggestions);
     

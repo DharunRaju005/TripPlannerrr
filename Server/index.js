@@ -2,11 +2,15 @@ const express=require('express');
 const dotenv=require('dotenv');
 dotenv.config();
 const makeConnection=require('./config/mongoClient')
-
+const verifyToken = require('./middleware/verifyToken');
 const locationRoute=require('./routes/locationRoute')
 const {pool,listTables}=require('./config/postgresClient');
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const userRoute=require('./routes/userRoutes');
 // makePsConnect();
+const bodyParser = require('body-parser');
+
 makeConnection();
 listTables();
 
@@ -36,10 +40,21 @@ listTables();
 //       console.log('become a customer: https://opencagedata.com/pricing');
 //     }
 //   });
-const app=express();
 
-app.use("/attraction",locationRoute);
-  
+const app=express();
+// Use CORS middleware
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['get','post','put','DELETE'],
+    credentials: true
+}));
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/",userRoute)
+app.use("/attraction", locationRoute);
   
 
 
