@@ -181,31 +181,31 @@ const getSuggestionBasedOnWeather = async (weatherData, attractions, days) => {
       weatherForTheDay.map(async (weather) => {
         const suggestionsForAttractions = await Promise.all(
           dailyAttractions.map(async (attraction) => {
-            const res = await getLocalRestaurants(
-              attraction.latitude,
-              attraction.longitude
-            );
-            let nearestRestaurant = [];
+            // const res = await getLocalRestaurants(
+            //   attraction.latitude,
+            //   attraction.longitude
+            // );
+            // let nearestRestaurant = [];
 
-            if (res.length > 0) {
-              nearestRestaurant = res
-                .filter((place) => place.rating >= 3)
-                .map((restaurant) => ({
-                  ...restaurant,
-                  distance: calculateDistance(
-                    attraction.latitude,
-                    attraction.longitude,
-                    restaurant.latitude,
-                    restaurant.longitude
-                  ),
-                }))
-                .sort((a, b) => a.distance - b.distance)
-                .slice(0, 1); // Get the nearest restaurant
-            }
+            // if (res.length > 0) {
+            //   nearestRestaurant = res
+            //     .filter((place) => place.rating >= 3)
+            //     .map((restaurant) => ({
+            //       ...restaurant,
+            //       distance: calculateDistance(
+            //         attraction.latitude,
+            //         attraction.longitude,
+            //         restaurant.latitude,
+            //         restaurant.longitude
+            //       ),
+            //     }))
+            //     .sort((a, b) => a.distance - b.distance)
+            //     .slice(0, 1); // Get the nearest restaurant
+            // }
 
             return {
               attraction,
-              restaurant: nearestRestaurant,
+              // restaurant: nearestRestaurant,
             };
           })
         );
