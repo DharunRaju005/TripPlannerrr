@@ -58,9 +58,9 @@ app.use("/",userRoute)
 app.use("/attraction", locationRoute);
   
 
-    
+
 const port=process.env.PORT||3001;
-app.listen(port,()=>{
+app.listen(port,'0.0.0.0',()=>{
     console.log(`The server is listening on port ${port}`);
     
 })
