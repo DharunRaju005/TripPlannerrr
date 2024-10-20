@@ -9,10 +9,10 @@ router.post('/register', userController.registerUser);
 router.post('/login', userController.loginUser);
 
 
-router.get('/:id',verifyToken, userController.getUserProfile);
+// router.get('/:id',verifyToken, userController.getUserProfile);
 
 
-router.put('/:id',verifyToken, userController.updateUserProfile);
+// router.put('/:id',verifyToken, userController.updateUserProfile);
 
 router.post('/logout',verifyToken,userController.logout);
 
