@@ -45,7 +45,7 @@ const app=express();
 // Use CORS middleware
 app.use(cors({
     origin: ['https://tripplannerrr.onrender.com', 
-    'http://localhost:5173','https://tripplannerbe.onrender.com'],
+    'http://localhost:5173','https://tripplannerfe.onrender.com'],
     methods: ['get','post','put','DELETE'],
     credentials: true
 }));
@@ -58,7 +58,7 @@ app.use("/",userRoute)
 app.use("/attraction", locationRoute);
   
 
-
+    
 const port=process.env.PORT||3001;
 app.listen(port,()=>{
     console.log(`The server is listening on port ${port}`);
