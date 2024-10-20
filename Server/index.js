@@ -44,7 +44,8 @@ listTables();
 const app=express();
 // Use CORS middleware
 app.use(cors({
-    origin: '*',
+    origin: ['https://tripplannerrr.onrender.com', 
+    'http://localhost:5173',],
     methods: ['get','post','put','DELETE'],
     credentials: true
 }));
