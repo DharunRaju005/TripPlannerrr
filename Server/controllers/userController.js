@@ -21,6 +21,7 @@ const registerUser = async (req, res) => {
         // Set the JWT token in a cookie
         res.cookie('tp', token, {
             httpOnly: true,
+            secure: true,
             maxAge: 2 * 24 * 60 * 60 * 1000 // 2 days
         });
 
