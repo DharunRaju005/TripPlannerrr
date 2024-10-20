@@ -137,7 +137,7 @@ const SignUp = () => {
     e.preventDefault();
     try {
       // eslint-disable-next-line no-unused-vars
-      const response = await axios.post("http://localhost:7000/register", formData, {
+      const response = await axios.post("https://tripplannerserver-y7ge.onrender.com/register", formData, {
         headers: {
           "Content-Type": "application/json",
         },
