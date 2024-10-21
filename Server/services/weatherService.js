@@ -138,7 +138,7 @@ const getSuggestionBasedOnWeather = async (weatherData, attractions, days) => {
           if (weatherCondition === "clouds") {
             return idealWeather.includes("cloud");
           } else if (weatherCondition === "rain") {
-            return idealWeather.includes("clear");
+            return idealWeather.includes("rain");
           } else {
             return true;
           }
