@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "start": "serve -s dist",
-    "postinstall": "npm install",
+    
     "lint": "eslint .",
     "preview": "vite preview"
   },
