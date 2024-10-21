@@ -60,7 +60,7 @@ app.use("/attraction", locationRoute);
 
 
 const port=process.env.PORT||3001;
-app.listen(port,'0.0.0.0',()=>{
+app.listen(port,()=>{
     console.log(`The server is listening on port ${port}`);
     
 })
