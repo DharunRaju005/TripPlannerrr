@@ -124,6 +124,7 @@ const RestaurantItem = styled.div`
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
     width: calc(21% - 17px); /* Set width to approximately 23% to fit four cards in a row */
+    cursor: pointer; /* Make it clear that the item is clickable */
 
     &:hover {
         transform: translateY(-10px);
@@ -176,6 +177,11 @@ const AttractionDescriptionPage = () => {
         window.open(googleMapsUrl, '_blank');
     };
 
+    const handleRestaurantClick = (latitude, longitude) => {
+        const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        window.open(googleMapsUrl, '_blank');
+    };
+
     return (
         <Container>
             <Header>{attraction.name}</Header>
@@ -203,7 +209,10 @@ const AttractionDescriptionPage = () => {
             <RestaurantList>
                 <NearbyRestaurantsHeader>Nearby Restaurants:</NearbyRestaurantsHeader>
                 {restaurants && restaurants.slice(0, 4).map((restaurant, index) => (
-                    <RestaurantItem key={index}>
+                    <RestaurantItem 
+                        key={index} 
+                        onClick={() => handleRestaurantClick(restaurant.latitude, restaurant.longitude)}
+                    >
                         <img src={rest} alt={restaurant.name} />
                         <div>
                             <strong>{restaurant.name}</strong>
