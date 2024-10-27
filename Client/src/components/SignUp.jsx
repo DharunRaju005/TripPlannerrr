@@ -142,6 +142,8 @@ const SignUp = () => {
           "Content-Type": "application/json",
         },
         withCredentials: true,
+        credentials: 'include'
+
       });
 
       // After successful signup, log in the user and set their details

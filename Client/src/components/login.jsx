@@ -131,7 +131,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("https://tripplannerbe.onrender.com/login", formData, { withCredentials: true });
+      const response = await axios.post("https://tripplannerbe.onrender.com/login", formData, { withCredentials: true ,credentials:'include'
+      });
       console.log("Login successful:", response.data);
       
       // Make sure this matches your response structure
