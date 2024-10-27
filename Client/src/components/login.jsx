@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import bannerImage from "../assets/seaside.jpg"; // Ensure this path is correct
+import styled, { keyframes } from "styled-components";
+import bannerImage from "../assets/seaside.jpg";
 import axios from "axios";
-import { useAuth } from "../hooks/useAuth"; // Import the useAuth hook
+import { useAuth } from "../hooks/useAuth";
+
+// Keyframes for Spinner animation
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
 
 // Styled components
 const Container = styled.div`
@@ -22,7 +28,7 @@ const Container = styled.div`
 const Form = styled.form`
   width: 408px;
   border-radius: 16.8px;
-  padding: 47.2px;
+  padding: 40px;
   box-shadow: 0 2.72px 13.6px rgba(0, 0, 0, 0.2);
   background-color: rgba(255, 255, 255, 0.9);
   transition: transform 0.2s ease-in-out;
@@ -45,11 +51,11 @@ const Label = styled.label`
 `;
 
 const Input = styled.input`
-  width: 100%;
-  padding: 13.6px;
+  max-width: 408px;
+  min-width: 383px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5.4px;
-  box-sizing: border-box;
   background-color: transparent;
   color: #112211;
   outline: none;
@@ -62,33 +68,47 @@ const Input = styled.input`
   }
 `;
 
-const Button = styled.button`
-  background: #112211;
+// Button with loading prop styling
+const Button = styled.button.attrs((props) => ({
+  disabled: props.loading,
+}))`
+  background: ${({ loading }) => (loading ? "#ccc" : "#112211")};
   border: 1.36px solid #8dd3bb;
   border-radius: 6.8px;
   color: #ffffff;
   font-family: "Montserrat";
   width: 100%;
-  height: 38.4px;
+  height: 42px;
   font-weight: 600;
   font-size: 13.6px;
-  cursor: pointer;
-  transition: background-color 0.6s ease, color 0.6s ease,
-    border-color 0.6s ease, transform 0.3s ease;
+  cursor: ${({ loading }) => (loading ? "not-allowed" : "pointer")};
+  transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease,
+    transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
-    background: #ffffff;
-    color: #112211;
+    background: ${({ loading }) => (loading ? "#ccc" : "#ffffff")};
+    color: ${({ loading }) => (loading ? "#ffffff" : "#112211")};
     border-color: #112211;
-    transform: scale(1.05);
+    transform: ${({ loading }) => (loading ? "none" : "scale(1.05)")};
   }
 
   &:active {
-    background: #004c3f;
+    background: ${({ loading }) => (loading ? "#ccc" : "#004c3f")};
     color: white;
-    transform: scale(0.95);
-    transition: transform 0.15s ease;
+    transform: ${({ loading }) => (loading ? "none" : "scale(0.95)")};
   }
+`;
+
+const Spinner = styled.div`
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: ${spin} 0.6s linear infinite;
 `;
 
 const Title = styled.h1`
@@ -120,41 +140,42 @@ const TextLink = styled.p`
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState(""); // State to hold error messages
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // Get login function from useAuth
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await axios.post("https://tripplannerbe.onrender.com/login", formData, { withCredentials: true ,credentials:'include'
       });
       console.log("Login successful:", response.data);
-      
-      // Make sure this matches your response structure
-      const userData = { name: response.data.user.username, email: response.data.user.email };
-      console.log(userData);
-      
-      // Store user data in the global context
-      login(userData); // Call the login function from useAuth
-      
-      navigate("/");  // Redirect on successful login
+      const userData = {
+        name: response.data.user.username,
+        email: response.data.user.email,
+      };
+      login(userData);
+      navigate("/");
     } catch (err) {
       console.error("Login failed:", err);
       setError("Invalid email or password");
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
     <Container>
       <Form onSubmit={handleSubmit}>
         <Title>Login to Your Account</Title>
-        {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
+        {error && <p style={{ color: "red" }}>{error}</p>}
         <FormGroup>
           <Label htmlFor="email">Email:</Label>
           <Input
@@ -177,7 +198,9 @@ const Login = () => {
             required
           />
         </FormGroup>
-        <Button type="submit">Login</Button>
+        <Button type="submit" loading={loading}>
+          {loading ? <Spinner /> : "Login"}
+        </Button>
         <TextLink>
           Don’t have an account? <a onClick={() => navigate("/signup")}>Sign Up</a>
         </TextLink>

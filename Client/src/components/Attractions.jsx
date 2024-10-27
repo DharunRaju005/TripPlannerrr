@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import sside from '../assets/seaside.jpg';
-
+import { useAttractions } from '../context/Attractionscontext';
 // Skeleton keyframes for the loading effect
 const shimmer = keyframes`
   0% {
@@ -156,13 +156,11 @@ const SkeletonAttraction = () => (
         <SkeletonLoader width="100px" height="24px" borderRadius="4px" />
     </AttractionContainer>
 );
-
 const AttractionsPage = () => {
     const location = useLocation();
     const { destination, startDate, totalDays } = location.state || {};
-    const [attractions, setAttractions] = useState([]);
+    const { attractions, setAttractions, isLoading, setIsLoading } = useAttractions();
     const [selectedAttractions, setSelectedAttractions] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -181,9 +179,7 @@ const AttractionsPage = () => {
                     }, 
                     withCredentials: true
                 });
-                console.log(response.data);
                 
-                // Group attractions by day and remove duplicates
                 const groupedAttractions = response.data.map((dayData) => ({
                     day: `Day ${dayData.day}`,
                     attractions: dayData.suggestions.flatMap(suggestion =>
@@ -218,16 +214,48 @@ const AttractionsPage = () => {
         };
 
         fetchAttractions();
-    }, [destination, startDate, totalDays]);
+    }, [destination, startDate, totalDays, setAttractions, setIsLoading]);
 
     // Handle Checkbox Change
-    const handleCheckboxChange = (attraction) => {
+    const handleCheckboxChange = (attractionId) => {
         setSelectedAttractions(prev => {
-            if (prev.includes(attraction)) {
-              return prev.filter((item) => item !== attraction);
+            if (prev.includes(attractionId)) {
+                return prev.filter((id) => id !== attractionId);
             }
-            return [...prev, attraction];
+            return [...prev, attractionId];
         });
+    };
+
+    // On button click, calculate the shortest path and navigate to the next page
+    const handleCalculatePath = () => {
+        if (selectedAttractions.length < 2) {
+            alert("Please select at least 2 attractions to calculate a path.");
+            return;
+        }
+
+        let totalDistance = 0;
+        const selectedAttractionObjects = attractions
+            .flatMap(dayGroup => dayGroup.attractions)
+            .filter(attraction => selectedAttractions.includes(attraction.id));
+
+        selectedAttractionObjects.forEach((attraction, index) => {
+            if (index < selectedAttractionObjects.length - 1) {
+                const nextAttraction = selectedAttractionObjects[index + 1];
+                const distance = haversine(
+                    attraction.latitude,
+                    attraction.longitude,
+                    nextAttraction.latitude,
+                    nextAttraction.longitude
+                );
+                totalDistance += distance;
+            }
+        });
+
+        navigate('/shortest-path', { state: { path: selectedAttractionObjects, totalDistance: totalDistance.toFixed(2) } });
+    };
+
+    const handleAttractionClick = (attraction) => {
+        navigate('/Attractions_Description', { state: { attraction, restaurants: attraction.restaurants || [] } });
     };
 
     // Haversine function for distance calculation
@@ -242,33 +270,6 @@ const AttractionsPage = () => {
         return R * c; // Distance in km
     };
 
-    // On button click, calculate the shortest path and navigate to the next page
-    const handleCalculatePath = () => {
-        if (selectedAttractions.length < 2) {
-            alert("Please select at least 2 attractions to calculate a path.");
-            return;
-        }
-
-        let totalDistance = 0;
-        selectedAttractions.forEach((attraction, index) => {
-            if (index < selectedAttractions.length - 1) {
-                const distance = haversine(
-                    attraction.latitude,
-                    attraction.longitude,
-                    selectedAttractions[index + 1].latitude,
-                    selectedAttractions[index + 1].longitude
-                );
-                totalDistance += distance;
-            }
-        });
-
-        navigate('/shortest-path', { state: { path: selectedAttractions, totalDistance: totalDistance.toFixed(2) } });
-    };
-
-    const handleAttractionClick = (attraction) => {
-        navigate('/Attractions_Description', { state: { attraction, restaurants: attraction.restaurants || [] } });
-    };
-
     return (
         <Container>
             <Header>{destination} Attractions</Header>
@@ -277,7 +278,7 @@ const AttractionsPage = () => {
             ) : (
                 attractions.map((dayGroup) => (
                     <AllAttractions key={dayGroup.day}>
-                        <DayHeader><Day>{dayGroup.day}</Day></DayHeader> {/* Updated Header */}
+                        <DayHeader><Day>{dayGroup.day}</Day></DayHeader>
                         {dayGroup.attractions.map((attraction) => (
                             <AttractionContainer key={attraction.id}>
                                 <AttractionImage src={sside} alt={attraction.name} />
@@ -289,8 +290,8 @@ const AttractionsPage = () => {
                                 </AttractionDetails>
                                 <CheckBox 
                                     type="checkbox" 
-                                    checked={selectedAttractions.includes(attraction)} 
-                                    onChange={() => handleCheckboxChange(attraction)} 
+                                    checked={selectedAttractions.includes(attraction.id)} 
+                                    onChange={() => handleCheckboxChange(attraction.id)} 
                                 />
                             </AttractionContainer>
                         ))}
