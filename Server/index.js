@@ -11,7 +11,7 @@ const userRoute=require('./routes/userRoutes');
 // makePsConnect();
 const bodyParser = require('body-parser');
 
-makeConnection();
+// makeConnection();
 listTables();
 
 
@@ -58,7 +58,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/",userRoute)
-app.use("/attraction", locationRoute);
+app.use("/attraction", locationRoute,verifyToken);
   
 
 
