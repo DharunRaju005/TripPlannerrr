@@ -72,6 +72,7 @@ const getUserProfile=async(userId)=>{
     }
     
 }
+
 const getUserProfileByName=async(userId)=>{
     try{
         const q=`select * from users where  full_name like %$1%`;

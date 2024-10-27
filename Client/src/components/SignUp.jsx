@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import bannerImage from "../assets/seaside.jpg"; // Ensure this path is correct
-import axios from "axios"; // Import axios
-import { useAuth } from '../hooks/useAuth'; // Import the custom auth hook
+import styled, { keyframes } from "styled-components";
+import bannerImage from "../assets/seaside.jpg";
+import axios from "axios";
+import { useAuth } from "../hooks/useAuth";
 
+// Styled components
 const Container = styled.div`
   display: flex;
   justify-content: center;
@@ -19,40 +20,41 @@ const Container = styled.div`
 `;
 
 const Form = styled.form`
-  width: 408px;
-  border-radius: 16.8px;
-  padding: 47.2px;
-  box-shadow: 0 2.72px 13.6px rgba(0, 0, 0, 0.2);
+  width: 346.8px; /* Reduced from 408px */
+  border-radius: 14.3px; /* Reduced from 16.8px */
+  padding: 40.12px; /* Reduced from 47.2px */
+  box-shadow: 0 2.31px 11.56px rgba(0, 0, 0, 0.2);
   background-color: rgba(255, 255, 255, 0.9);
   transition: transform 0.2s ease-in-out;
+
   &:hover {
     transform: scale(1.05);
   }
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 16.8px;
+  margin-bottom: 12.75px; /* Reduced from 15px */
 `;
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 6.8px;
+  margin-bottom: 5.78px; /* Reduced from 6.8px */
   font-weight: bold;
-  font-size: 17.6px;
+  font-size: 14.96px; /* Reduced from 17.6px */
   color: #112211;
 `;
 
 const Input = styled.input`
-  width: 100%;
-  padding: 13.6px;
+  max-width: 346.8px;
+  min-width: 328.95px; /* Reduced from 387px */
+  padding: 8.5px; /* Reduced from 10px */
   border: 1px solid #ccc;
-  border-radius: 5.4px;
-  box-sizing: border-box;
+  border-radius: 4.59px; /* Reduced from 5.4px */
   background-color: transparent;
   color: #112211;
   outline: none;
-  font-size: 15.6px;
-  height: 29.6px;
+  font-size: 13.26px; /* Reduced from 15.6px */
+  height: 25.16px; /* Reduced from 29.6px */
   transition: border 0.3s ease-in-out;
 
   &:focus {
@@ -60,19 +62,35 @@ const Input = styled.input`
   }
 `;
 
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+const Spinner = styled.div`
+  border: 1.7px solid rgba(255, 255, 255, 0.6); /* Reduced from 2px */
+  border-top: 1.7px solid #fff;
+  border-radius: 50%;
+  width: 15.3px; /* Reduced from 18px */
+  height: 15.3px; /* Reduced from 18px */
+  animation: ${spin} 0.6s linear infinite;
+`;
+
 const Button = styled.button`
   background: #112211;
-  border: 1.36px solid #8dd3bb;
-  border-radius: 6.8px;
+  border: 1.156px solid #8dd3bb; /* Reduced from 1.36px */
+  border-radius: 5.78px; /* Reduced from 6.8px */
   color: #ffffff;
   font-family: "Montserrat";
   width: 100%;
-  height: 38.4px;
+  height: 36px; /* Reduced from 38.4px */
   font-weight: 600;
-  font-size: 13.6px;
+  font-size: 11.56px; /* Reduced from 13.6px */
   cursor: pointer;
-  transition: background-color 0.6s ease, color 0.6s ease,
-    border-color 0.6s ease, transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease, transform 0.3s ease;
 
   &:hover {
     background: #ffffff;
@@ -87,21 +105,26 @@ const Button = styled.button`
     transform: scale(0.95);
     transition: transform 0.15s ease;
   }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
 `;
 
 const Title = styled.h1`
   font-weight: bold;
-  font-size: 24px;
+  font-size: 20.4px; /* Reduced from 24px */
   color: #112211;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 27.2px; /* Reduced from 32px */
 `;
 
 const TextLink = styled.p`
-  margin-top: 20px;
+  margin-top: 17px; /* Reduced from 20px */
   text-align: center;
   color: #112211;
-  font-size: 14px;
+  font-size: 14px; /* Reduced from 14px */
   cursor: pointer;
 
   a {
@@ -117,7 +140,7 @@ const TextLink = styled.p`
 `;
 
 const SignUp = () => {
-  const { login } = useAuth(); // Use login from auth hook
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -126,6 +149,7 @@ const SignUp = () => {
     bio: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -135,6 +159,8 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       // eslint-disable-next-line no-unused-vars
       const response = await axios.post("https://tripplannerbe.onrender.com/register", formData, {
@@ -146,13 +172,13 @@ const SignUp = () => {
 
       });
 
-      // After successful signup, log in the user and set their details
       login({ name: formData.full_name, email: formData.email });
 
-      // Navigate to the home page or wherever necessary
-      navigate("/");
+      navigate("/", { state: { message: "Sign up successful! Welcome!" } });
     } catch (err) {
       setError(err.response?.data?.message || "Failed to sign up. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -160,7 +186,7 @@ const SignUp = () => {
     <Container>
       <Form onSubmit={handleSubmit}>
         <Title>Create an Account</Title>
-        {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
+        {error && <p style={{ color: "red" }}>{error}</p>}
         <FormGroup>
           <Label htmlFor="username">Username:</Label>
           <Input
@@ -216,7 +242,9 @@ const SignUp = () => {
             required
           />
         </FormGroup>
-        <Button type="submit">Sign Up</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? <Spinner /> : "Sign Up"}
+        </Button>
         <TextLink>
           Already have an account? <a onClick={() => navigate("/login")}>Login</a>
         </TextLink>
