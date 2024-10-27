@@ -22,6 +22,7 @@ const registerUser = async (req, res) => {
         res.cookie('tp', token, {
             httpOnly: true,
             secure: true,
+            sameSite: 'None',
             maxAge: 2 * 24 * 60 * 60 * 1000 // 2 days
         });
 
@@ -49,6 +50,8 @@ const loginUser = async (req, res) => {
         const { token, user } = await userService.loginUser(email, password);
         res.cookie('tp',token,{
             httpOnly:true,
+            secure: true,
+            sameSite: 'None',
             maxAge:2* 24 * 60 * 60 * 1000,
           });
         res.status(200).json({ message: 'Logged in successfully', token, user });
