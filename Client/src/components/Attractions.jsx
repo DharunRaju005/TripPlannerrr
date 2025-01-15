@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import sside from '../assets/seaside.jpg';
 import { useAttractions } from '../context/Attractionscontext';
+import { useAuth } from "../hooks/useAuth";
 // Skeleton keyframes for the loading effect
 const shimmer = keyframes`
   0% {
@@ -162,6 +163,14 @@ const AttractionsPage = () => {
     const { attractions, setAttractions, isLoading, setIsLoading } = useAttractions();
     const [selectedAttractions, setSelectedAttractions] = useState([]);
     const navigate = useNavigate();
+
+    const { user } = useAuth(); // Check the logged-in user
+    useEffect(() => {
+        // Redirect to login if user is not authenticated
+        if (!user) {
+            navigate('/login', { replace: true });
+        }
+    }, [user, navigate]);
 
     useEffect(() => {
         if (!destination || !startDate || !totalDays) {
