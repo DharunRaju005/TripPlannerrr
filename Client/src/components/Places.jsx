@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import WorldMap from '../assets/world.svg'; // Path to your SVG map
+import { useAuth } from "../hooks/useAuth";
 
 // Main container for the whole Places section
 const PlacesContainer = styled.div`
@@ -93,6 +95,20 @@ const Button = styled.button`
 
 // Places component
 const Places = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/", { replace: true }); // Redirect to login if user is not authenticated
+    }
+  }, [user, navigate]);
+
+  // Render the component only if the user is authenticated
+  if (!user) {
+    return null; // Avoid rendering anything while redirecting
+  }
+
   return (
     <PlacesContainer>
       <TextContainer>

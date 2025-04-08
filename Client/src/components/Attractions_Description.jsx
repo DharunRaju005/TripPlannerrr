@@ -1,10 +1,11 @@
 // eslint-disable-next-line no-unused-vars
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import rest from '../assets/history.webp';
 import sside from '../assets/seaside.jpg';
+import { useAuth } from '../hooks/useAuth'; // Import the useAuth hook
 
 // Styled Components with mobile optimizations
 const Container = styled.div`
@@ -237,7 +238,19 @@ const NearbyRestaurantsHeader = styled.h3`
 const AttractionDescriptionPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+    const { user } = useAuth(); // Get authentication status
   const { attraction, restaurants } = location.state || {};
+
+    // Redirect to login if the user is not authenticated
+    useEffect(() => {
+        if (!user) {
+            navigate('/login', { replace: true }); // Redirect to login page
+        }
+    }, [user, navigate]);
+
+    if (!user) {
+        return null; // Prevent rendering while redirecting
+    }
 
   if (!attraction) {
     return <div>No attraction data found.</div>;

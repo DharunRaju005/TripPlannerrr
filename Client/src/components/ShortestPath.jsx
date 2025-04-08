@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import styled from 'styled-components';
+import { useAuth } from "../hooks/useAuth";
 import L from 'leaflet';
 import axios from 'axios';
 import polyline from '@mapbox/polyline';
 import { IoLocationSharp } from "react-icons/io5";
 import { renderToStaticMarkup } from 'react-dom/server';
+//import {login} from "./login"; // Adjust the path as needed
 
 // Styled Components with mobile optimizations
 const Container = styled.div`
@@ -91,11 +94,19 @@ const createCustomIcon = () => {
 };
 
 const ShortestPath = () => {
+    const { user } = useAuth();
   const location = useLocation();
   const { path = [], totalDistance = 0 } = location.state || {};
   const [markerPositions, setMarkerPositions] = useState([]);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [error, setError] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            navigate("/login",{replace:true}); // Redirect to login if user is not authenticated
+        }
+    }, [user, navigate]);
 
   const fetchRoute = async (coordinates) => {
     const waypoints = coordinates.map(coord => coord.join(',')).join(';');

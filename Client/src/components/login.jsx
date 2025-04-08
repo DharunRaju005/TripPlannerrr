@@ -5,6 +5,7 @@ import bannerImage from "../assets/seaside.jpg";
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
 
+
 // Keyframes for Spinner animation
 const spin = keyframes`
   0% { transform: rotate(0deg); }
