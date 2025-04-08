@@ -1,3 +1,4 @@
+/* src/index.css */
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -13,6 +14,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Base styles */
 a {
   font-weight: 500;
   color: #646cff;
@@ -23,14 +25,14 @@ a:hover {
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 3.2em; /* Large for desktop */
   line-height: 1.1;
 }
 
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  padding: 0.6em 1.2em; /* Decent size, but we'll adjust for mobile */
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
@@ -46,6 +48,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Light mode */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -56,5 +59,54 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Reduce font sizes for readability */
+  h1 {
+    font-size: 2em; /* Smaller on mobile */
+  }
+
+  /* Make buttons touch-friendly */
+  button {
+    padding: 0.8em 1.5em; /* Larger tap area */
+    font-size: 1.1em; /* Slightly larger text */
+    min-width: 120px; /* Ensure buttons aren’t too small */
+  }
+
+  /* Container for all components */
+  .container {
+    width: 90%;
+    margin: 0 auto;
+    padding: 10px; /* Reduced padding */
+  }
+
+  /* Stack flex layouts vertically */
+  .flex-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between stacked items */
+  }
+
+  /* Inputs for forms */
+  input, select, textarea {
+    width: 100%; /* Full width on mobile */
+    padding: 0.8em;
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding in width */
+  }
+}
+
+/* Leaflet map adjustments (used in ShortestPath or Attractions) */
+.leaflet-container {
+  width: 100%;
+  height: 400px; /* Desktop height */
+}
+
+@media (max-width: 768px) {
+  .leaflet-container {
+    height: 250px; /* Smaller map on mobile */
   }
 }

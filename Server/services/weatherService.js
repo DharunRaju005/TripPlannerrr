@@ -197,7 +197,7 @@ const getSuggestionBasedOnWeather = async (weatherData, attractions, days) => {
                     ),
                   }))
                   .sort((a, b) => a.distance - b.distance)
-                  .slice(0, 3); // Get the top 3 nearest restaurants
+                  .slice(0, 2); // Get the top 3 nearest restaurants
               }
             } catch (error) {
               if (error.response && error.response.status === 500) {

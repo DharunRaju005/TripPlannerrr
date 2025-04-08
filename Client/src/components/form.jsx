@@ -26,18 +26,23 @@ const buttonHoverScale = keyframes`
   }
 `;
 
-// Styled components
+// Styled components with mobile optimizations
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh; /* Changed to min-height to avoid clipping */
   width: 100%;
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url(${bannerImage});
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+  padding: 20px; /* Added padding for small screens */
+  box-sizing: border-box;
+  @media (max-width: 768px) {
+    padding: 10px; /* Reduced padding on mobile */
+  }
 `;
 
 const Header = styled.div`
@@ -45,6 +50,10 @@ const Header = styled.div`
   top: 20px;
   right: 20px;
   z-index: 100;
+  @media (max-width: 768px) {
+    top: 10px;
+    right: 10px;
+  }
 `;
 
 const ProfileButton = styled.button`
@@ -56,8 +65,7 @@ const ProfileButton = styled.button`
   display: flex;
   align-items: center;
   gap: 10px;
-  position: relative;
-  padding: 5px;
+  padding: 10px; /* Increased for touch */
   transition: color 0.3s ease, transform 0.3s ease;
 
   &:hover {
@@ -79,22 +87,29 @@ const ProfileButton = styled.button`
   &:hover:after {
     width: 100%;
   }
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem; /* Smaller text */
+    padding: 8px; /* Still touch-friendly */
+  }
 `;
 
 const ProfilePopup = styled.div`
   position: absolute;
-  top: 60px;
+  top: 50px;
   right: 0;
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(5px);
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px; /* Reduced padding */
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2);
   z-index: 200;
   display: flex;
   flex-direction: column;
   gap: 10px;
   animation: ${fadeInSlideDown} 0.4s ease;
+  width: 200px; /* Fixed width for consistency */
+  max-width: 90%; /* Prevent overflow on small screens */
 
   &::before {
     content: "";
@@ -107,6 +122,12 @@ const ProfilePopup = styled.div`
     transform: rotate(45deg);
     box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
   }
+
+  @media (max-width: 768px) {
+    top: 40px; /* Closer to button */
+    padding: 10px;
+    width: 180px; /* Slightly smaller */
+  }
 `;
 
 const PopupItem = styled.div`
@@ -116,12 +137,15 @@ const PopupItem = styled.div`
   font-weight: 500;
   display: flex;
   align-items: center;
-  min-width: 250px;
   gap: 8px;
   border-bottom: 1px solid #eee;
 
   &:last-child {
     border-bottom: none;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem; /* Smaller text */
   }
 `;
 
@@ -154,10 +178,17 @@ const LogoutButton = styled.button`
     color: white;
     transform: scale(0.95);
   }
+
+  @media (max-width: 768px) {
+    font-size: 12px; /* Slightly smaller */
+    padding: 8px;
+    height: 36px;
+  }
 `;
 
 const Form = styled.form`
-  width: 408px;
+  width: 408px; /* Default for desktop */
+  max-width: 100%; /* Prevent overflow */
   border-radius: 16.8px;
   padding: 47.2px;
   box-shadow: 0 2.72px 13.6px rgba(0, 0, 0, 0.2);
@@ -167,10 +198,16 @@ const Form = styled.form`
   &:hover {
     transform: scale(1.05);
   }
+
+  @media (max-width: 768px) {
+    width: 90%; /* Full width with margin */
+    padding: 20px; /* Reduced padding */
+  }
 `;
 
 const FormGroup = styled.div`
   margin-bottom: 16.8px;
+  position: relative; /* For dropdown positioning */
 `;
 
 const Label = styled.label`
@@ -179,11 +216,15 @@ const Label = styled.label`
   font-weight: bold;
   font-size: 17.6px;
   color: #112211;
+
+  @media (max-width: 768px) {
+    font-size: 14px; /* Smaller labels */
+  }
 `;
 
 const Input = styled.input`
-  max-width: 408px;
-  min-width: 383px;
+  width: 100%; /* Full width */
+  max-width: 408px; /* Desktop max */
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5.4px;
@@ -191,11 +232,17 @@ const Input = styled.input`
   color: #112211;
   outline: none;
   font-size: 15.6px;
-  height: 29.6px;
+  height: 38px; /* Increased for touch */
+  box-sizing: border-box; /* Include padding in width */
   transition: border 0.3s ease-in-out;
 
   &:focus {
     border-color: #8dd3bb;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 14px; /* Readable but smaller */
+    height: 40px; /* Larger touch target */
   }
 `;
 
@@ -225,17 +272,27 @@ const Button = styled.button`
     transform: scale(0.95);
     transition: transform 0.15s ease;
   }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    height: 40px; /* Larger tap area */
+    padding: 10px;
+  }
 `;
 
 const Title = styled.h1`
   display: block;
-  margin-bottom: 6.8px;
+  margin-bottom: 32px;
   font-weight: bold;
   font-size: 24px;
   color: #112211;
   text-align: center;
-  margin-bottom: 32px;
   animation: ${fadeInSlideDown} 1s ease;
+
+  @media (max-width: 768px) {
+    font-size: 20px; /* Smaller title */
+    margin-bottom: 20px;
+  }
 `;
 
 const MessagePopup = styled.div`
@@ -251,32 +308,54 @@ const MessagePopup = styled.div`
   text-align: center;
   width: 90%;
   max-width: 400px;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    max-width: 300px; /* Smaller popup */
+  }
 `;
 
 const PopupText = styled.p`
   color: #112211;
   font-size: 16px;
   font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
 `;
 
-// Dropdown and DropdownItem styles
 const Dropdown = styled.div`
   position: absolute;
+  top: 100%; /* Below input */
+  left: 0;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 5px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   max-height: 150px;
   overflow-y: auto;
   z-index: 100;
-  width: 100%;
+  width: 100%; /* Match input width */
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    max-height: 120px; /* Smaller dropdown */
+  }
 `;
 
 const DropdownItem = styled.div`
   padding: 10px;
   cursor: pointer;
   color: #112211;
+  font-size: 15.6px;
+
   &:hover {
     background-color: #f0f0f0;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    padding: 8px;
   }
 `;
 
@@ -325,13 +404,13 @@ const TripForm = () => {
         destination.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredDestinations(filtered);
-      setShowDropdown(value !== ""); // Show dropdown if there's input
+      setShowDropdown(value !== "");
     }
   };
 
   const handleDropdownItemClick = (destination) => {
     setFormData({ ...formData, destination });
-    setShowDropdown(false); // Close dropdown
+    setShowDropdown(false);
   };
 
   const handleSubmit = async (e) => {
@@ -385,7 +464,7 @@ const TripForm = () => {
               name="destination"
               value={formData.destination}
               onChange={handleChange}
-              onFocus={() => setShowDropdown(true)} // Show dropdown on focus
+              onFocus={() => setShowDropdown(true)}
             />
             {showDropdown && filteredDestinations.length > 0 && (
               <Dropdown ref={dropdownRef}>
